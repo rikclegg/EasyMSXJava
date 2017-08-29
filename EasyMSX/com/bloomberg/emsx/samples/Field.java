@@ -1,5 +1,7 @@
 package com.bloomberg.emsx.samples;
 
+import java.util.ArrayList;
+
 public class Field {
 	
 	private String name;
@@ -7,6 +9,8 @@ public class Field {
 	private String current_value;	// Used to store the value last provided by an event - matches BLP
 	private Fields parent;
 	
+	ArrayList<NotificationHandler> notificationHandlers = new ArrayList<NotificationHandler>();
+
 	Field(Fields parent) {
 		this.parent = parent;
 	}
@@ -56,5 +60,19 @@ public class Field {
 		}
 		return fc;
 	}
+	
+	public void addNotificationHandler(NotificationHandler notificationHandler) {
+		notificationHandlers.add(notificationHandler);
+	}
+	
+	void notify(Notification notification) {
+		
+		for(NotificationHandler nh: notificationHandlers) {
+			if(!notification.consume) nh.processNotification(notification);
+		}
+		if(!notification.consume) parent.owner.processNotification(notification);
+
+	}
+
 }
 

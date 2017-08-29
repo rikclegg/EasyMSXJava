@@ -182,12 +182,14 @@ public class EasyMSX implements EventHandler, NotificationHandler {
         	}
         }
         
-        initializeOrders();
-		initializeRoutes();
-		
         Log.LogMessage(LogLevels.BASIC, "EMSXAPI initialization complete");
 	}
 
+	private void start() {
+        initializeOrders();
+		initializeRoutes();
+	}
+	
 	private void initializeSession() throws SessionException, IOException, InterruptedException {
 
 		if(this.environment == Environment.BETA) emsxServiceName = "//blp/emapisvc_beta";

@@ -34,6 +34,15 @@ public class Route extends FieldsOwner {
 			if(!notification.consume) nh.processNotification(notification);
 		}
 		if(!notification.consume) parent.processNotification(notification);
-
+	
 	}
+	
+	@Override
+	void processNotification(Notification notification) {
+		for(NotificationHandler nh: notificationHandlers) {
+			if(!notification.consume) nh.processNotification(notification);
+		}
+		if(!notification.consume) parent.processNotification(notification);
+	}
+
 }

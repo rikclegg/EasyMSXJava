@@ -44,7 +44,7 @@ class OrderSubscriptionHandler implements MessageHandler {
 				o = orders.createOrder(sequence);
 			}
 			o.fields.populateFields(message,false);
-			o.notify(new Notification(NotificationCategory.ORDER, NotificationType.INITIALPAINT, o, o.fields.getFieldChanges()));
+			o.processNotification(new Notification(NotificationCategory.ORDER, NotificationType.INITIALPAINT, o, o.fields.getFieldChanges()));
 			
 		} else if(eventStatus==6) { //new
 			Log.LogMessage(LogLevels.BASIC, "OrderSubscriptionHandler: NEW_ORDER_ROUTE message received");
@@ -56,7 +56,7 @@ class OrderSubscriptionHandler implements MessageHandler {
 			if(o==null) o = orders.createOrder(sequence);
 
 			o.fields.populateFields(message,false);
-			o.notify(new Notification(NotificationCategory.ORDER, NotificationType.NEW, o, o.fields.getFieldChanges()));
+			o.processNotification(new Notification(NotificationCategory.ORDER, NotificationType.NEW, o, o.fields.getFieldChanges()));
 			
 		} else if(eventStatus==7) { // update
 			Log.LogMessage(LogLevels.BASIC, "OrderSubscriptionHandler: UPD_ORDER_ROUTE message received");
@@ -71,7 +71,7 @@ class OrderSubscriptionHandler implements MessageHandler {
 				o = orders.createOrder(sequence);
 			}
 			o.fields.populateFields(message,true);
-			o.notify(new Notification(NotificationCategory.ORDER, NotificationType.UPDATE, o, o.fields.getFieldChanges()));
+			o.processNotification(new Notification(NotificationCategory.ORDER, NotificationType.UPDATE, o, o.fields.getFieldChanges()));
 		} else if(eventStatus==8) { // deleted/expired
 			Log.LogMessage(LogLevels.BASIC, "OrderSubscriptionHandler: DELETE message received");
 			Log.LogMessage(LogLevels.DETAILED, "Message: " + message.toString());
@@ -86,7 +86,7 @@ class OrderSubscriptionHandler implements MessageHandler {
 			}
 			o.fields.populateFields(message,false);
 			o.fields.field("EMSX_STATUS").setCurrentValue("EXPIRED");
-			o.notify(new Notification(NotificationCategory.ORDER, NotificationType.DELETE, o, o.fields.getFieldChanges()));
+			o.processNotification(new Notification(NotificationCategory.ORDER, NotificationType.DELETE, o, o.fields.getFieldChanges()));
 		} else if(eventStatus==11) { // INIT_PAINT_END
 			// End of inital paint messages
 			Log.LogMessage(LogLevels.BASIC, "OrderSubscriptionHandler: End of Initial Paint");

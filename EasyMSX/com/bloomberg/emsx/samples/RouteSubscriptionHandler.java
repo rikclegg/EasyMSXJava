@@ -46,7 +46,7 @@ class RouteSubscriptionHandler implements MessageHandler {
 			if(r==null) r = routes.createRoute(sequence, routeID);
 
 			r.fields.populateFields(message,false);
-			r.notify(new Notification(NotificationCategory.ROUTE, NotificationType.INITIALPAINT, r, r.fields.getFieldChanges()));
+			r.processNotification(new Notification(NotificationCategory.ROUTE, NotificationType.INITIALPAINT, r, r.fields.getFieldChanges()));
 			
 		} else if(eventStatus==6) { //new
 			Log.LogMessage(LogLevels.BASIC, "RouteSubscriptionHandler: NEW_ORDER_ROUTE message received");
@@ -60,7 +60,7 @@ class RouteSubscriptionHandler implements MessageHandler {
 			if(r==null) r = routes.createRoute(sequence,routeID);
 
 			r.fields.populateFields(message,false);
-			r.notify(new Notification(NotificationCategory.ROUTE, NotificationType.NEW, r, r.fields.getFieldChanges()));
+			r.processNotification(new Notification(NotificationCategory.ROUTE, NotificationType.NEW, r, r.fields.getFieldChanges()));
 			
 		} else if(eventStatus==7) { // update
 			Log.LogMessage(LogLevels.BASIC, "RouteSubscriptionHandler: UPD_ORDER_ROUTE message received");
@@ -76,7 +76,7 @@ class RouteSubscriptionHandler implements MessageHandler {
 				r = routes.createRoute(sequence, routeID);
 			}
 			r.fields.populateFields(message,true);
-			r.notify(new Notification(NotificationCategory.ROUTE, NotificationType.UPDATE, r, r.fields.getFieldChanges()));
+			r.processNotification(new Notification(NotificationCategory.ROUTE, NotificationType.UPDATE, r, r.fields.getFieldChanges()));
 		
 		} else if(eventStatus==8) { // deleted/expired
 			Log.LogMessage(LogLevels.BASIC, "RouteSubscriptionHandler: DELETE message received");
@@ -93,7 +93,7 @@ class RouteSubscriptionHandler implements MessageHandler {
 			}
 			r.fields.populateFields(message,false);
 			r.fields.field("EMSX_STATUS").setCurrentValue("EXPIRED");
-			r.notify(new Notification(NotificationCategory.ROUTE, NotificationType.DELETE, r, r.fields.getFieldChanges()));
+			r.processNotification(new Notification(NotificationCategory.ROUTE, NotificationType.DELETE, r, r.fields.getFieldChanges()));
 		} else if(eventStatus==11) { // INIT_PAINT_END
 			// End of inital paint messages
 			Log.LogMessage(LogLevels.BASIC, "RouteSubscriptionHandler: End of Initial Paint");

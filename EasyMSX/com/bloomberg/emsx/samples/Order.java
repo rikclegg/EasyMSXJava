@@ -1,5 +1,7 @@
 package com.bloomberg.emsx.samples;
 
+import java.util.ArrayList;
+
 public class Order extends FieldsOwner {
 	
 	Orders parent;
@@ -7,6 +9,8 @@ public class Order extends FieldsOwner {
 	private Broker broker;
 	public Object metaData;
 	
+	ArrayList<NotificationHandler> notificationHandlers = new ArrayList<NotificationHandler>();
+
 	Order(Orders parent) {
 		this.parent = parent;
 		this.fields = new Fields(this);
@@ -25,12 +29,12 @@ public class Order extends FieldsOwner {
 		notificationHandlers.add(notificationHandler);
 	}
 
-	@Override
-	void processNotification(Notification notification) {
+	void notify(Notification notification) {
+		
 		for(NotificationHandler nh: notificationHandlers) {
 			if(!notification.consume) nh.processNotification(notification);
 		}
 		if(!notification.consume) parent.processNotification(notification);
-	}
 
+	}
 }

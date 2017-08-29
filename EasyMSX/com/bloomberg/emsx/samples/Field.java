@@ -7,16 +7,13 @@ public class Field {
 	private String name;
 	private String old_value;		// Used to store the previous value when a current value is set from BLP event
 	private String current_value;	// Used to store the value last provided by an event - matches BLP
-	private Fields parent;
 	
 	ArrayList<NotificationHandler> notificationHandlers = new ArrayList<NotificationHandler>();
 
 	Field(Fields parent) {
-		this.parent = parent;
 	}
 	
 	Field(Fields parent, String name, String value) {
-		this.parent = parent;
 		this.name = name;
 		this.old_value = null;
 		this.current_value = null;
@@ -70,8 +67,6 @@ public class Field {
 		for(NotificationHandler nh: notificationHandlers) {
 			if(!notification.consume) nh.processNotification(notification);
 		}
-		if(!notification.consume) parent.owner.processNotification(notification);
-
 	}
 
 }

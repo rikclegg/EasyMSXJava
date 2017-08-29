@@ -8,9 +8,7 @@ import com.bloomberglp.blpapi.Name;
 
 class RouteSubscriptionHandler implements MessageHandler {
 	
-	private static final Name	SUBSCRIPTION_FAILURE 	= new Name("SubscriptionFailure");
 	private static final Name	SUBSCRIPTION_STARTED	= new Name("SubscriptionStarted");
-	private static final Name	SUBSCRIPTION_TERMINATED	= new Name("SubscriptionTerminated");
 
 	Routes routes;
 	

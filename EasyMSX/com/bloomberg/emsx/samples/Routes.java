@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.bloomberg.emsx.samples.Log.LogLevels;
-import com.bloomberglp.blpapi.Subscription;
 
 public class Routes implements Iterable<Route>, NotificationHandler {
 	
 	private ArrayList<Route> routes = new ArrayList<Route>();
 	ArrayList<NotificationHandler> notificationHandlers = new ArrayList<NotificationHandler>();
 
-	private Subscription routeSubscription;
-	
 	EasyMSX emsxapi;
 	
 	Routes(EasyMSX emsxapi) {

@@ -21,9 +21,6 @@ import com.bloomberglp.blpapi.SubscriptionList;
 
 public class EasyMSX implements EventHandler, NotificationHandler {
 
-	// EVENTS
-    private static final Name 	ORDER_ROUTE_FIELDS = new Name("OrderRouteFields");
-
 	// ADMIN
 	private static final Name 	SLOW_CONSUMER_WARNING	= new Name("SlowConsumerWarning");
 	private static final Name 	SLOW_CONSUMER_WARNING_CLEARED	= new Name("SlowConsumerWarningCleared");
@@ -38,11 +35,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 	// SERVICE_STATUS
 	private static final Name 	SERVICE_OPENED 			= new Name("ServiceOpened");
 	private static final Name 	SERVICE_OPEN_FAILURE 	= new Name("ServiceOpenFailure");
-
-	// SUBSCRIPTION_STATUS + SUBSCRIPTION_DATA
-	private static final Name	SUBSCRIPTION_FAILURE 	= new Name("SubscriptionFailure");
-	private static final Name	SUBSCRIPTION_STARTED	= new Name("SubscriptionStarted");
-	private static final Name	SUBSCRIPTION_TERMINATED	= new Name("SubscriptionTerminated");
 
 	private static final Name AUTHORIZATION_SUCCESS = new Name("AuthorizationSuccess");
 
@@ -185,7 +177,7 @@ public class EasyMSX implements EventHandler, NotificationHandler {
         Log.LogMessage(LogLevels.BASIC, "EMSXAPI initialization complete");
 	}
 
-	private void start() {
+	public void start() {
         initializeOrders();
 		initializeRoutes();
 	}

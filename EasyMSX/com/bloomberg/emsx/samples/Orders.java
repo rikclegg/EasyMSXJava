@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.bloomberg.emsx.samples.Log.LogLevels;
-import com.bloomberglp.blpapi.Subscription;
 
 public class Orders implements Iterable<Order>, NotificationHandler {
 	
 	private ArrayList<Order> orders = new ArrayList<Order>();
 	ArrayList<NotificationHandler> notificationHandlers = new ArrayList<NotificationHandler>();
 
-	private Subscription orderSubscription;
-	
 	EasyMSX emsxapi;
 	
 	Orders(EasyMSX emsxapi) {

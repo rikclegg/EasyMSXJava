@@ -1,14 +1,12 @@
 package com.bloomberg.emsx.samples;
 
 import java.util.ArrayList;
-import java.util.EventListener;
 
 public class Route extends FieldsOwner {
 	
 	Routes parent;
 	int sequence;
 	int routeID;
-	private Broker broker;
 	public Object metaData;
 	
 	ArrayList<NotificationHandler> notificationHandlers = new ArrayList<NotificationHandler>();
@@ -34,15 +32,6 @@ public class Route extends FieldsOwner {
 			if(!notification.consume) nh.processNotification(notification);
 		}
 		if(!notification.consume) parent.processNotification(notification);
-	
-	}
-	
-	@Override
-	void processNotification(Notification notification) {
-		for(NotificationHandler nh: notificationHandlers) {
-			if(!notification.consume) nh.processNotification(notification);
-		}
-		if(!notification.consume) parent.processNotification(notification);
-	}
 
+	}
 }

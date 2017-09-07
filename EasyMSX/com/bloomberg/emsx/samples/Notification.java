@@ -16,6 +16,7 @@ public class Notification {
 		UPDATE,
 		DELETE,
 		CANCEL,
+		FIELD,
 		ERROR
 	}
 

@@ -8,7 +8,6 @@ import com.bloomberg.emsx.samples.Log.LogLevels;
 import com.bloomberglp.blpapi.CorrelationID;
 import com.bloomberglp.blpapi.Event;
 import com.bloomberglp.blpapi.EventHandler;
-import com.bloomberglp.blpapi.Identity;
 import com.bloomberglp.blpapi.Message;
 import com.bloomberglp.blpapi.MessageIterator;
 import com.bloomberglp.blpapi.Name;
@@ -36,8 +35,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 	private static final Name 	SERVICE_OPENED 			= new Name("ServiceOpened");
 	private static final Name 	SERVICE_OPEN_FAILURE 	= new Name("ServiceOpenFailure");
 
-	private static final Name AUTHORIZATION_SUCCESS = new Name("AuthorizationSuccess");
-
 	private static final String DEFAULT_HOST = "localhost";
 	private static final int DEFAULT_PORT = 8194;
 	
@@ -48,11 +45,7 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 
 	private Environment environment;
 	private String host;
-	private String user;
 	private int port;
-	private String userIP;
-	
-	private boolean serverConnection=false;
 	
 	public Orders orders;
 	public Routes routes;
@@ -63,7 +56,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 	private SessionOptions sessionOptions;
 	
 	String emsxServiceName;
-	String authServiceName = "//blp/apiauth";
 	String brokerSpecServiceName;
 	Service emsxService;
 	Service brokerSpecService;
@@ -77,22 +69,16 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 	Team team;
 	String selectedTeam="";
 	
-	Identity userIdentity;
-	CorrelationID authRequestID;
-	
 	NotificationHandler globalNotificationHandler = null;
 
 	boolean orderBlotterInitialized = false;
 	boolean routeBlotterInitialized = false;
-	boolean authorized = false;
-	boolean authorizationFailed = false;
 
 	public EasyMSX() throws Exception {
 		
 		this.environment = Environment.BETA;
 		this.host = DEFAULT_HOST;
 		this.port = DEFAULT_PORT;
-		this.authorized = true;
 		
 		initialize();
 	}
@@ -103,7 +89,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 		this.host = DEFAULT_HOST;
 		this.port = DEFAULT_PORT;
 		this.selectedTeam = team;
-		this.authorized = true;
 		
 		initialize();
 	}
@@ -112,7 +97,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 		this.environment = env;
 		this.host = DEFAULT_HOST;
 		this.port = DEFAULT_PORT;
-		this.authorized = true;
 		
 		initialize();
 	}
@@ -122,35 +106,10 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 		this.host = DEFAULT_HOST;
 		this.port = DEFAULT_PORT;
 		this.selectedTeam = team;
-		this.authorized = true;
 		
 		initialize();
 	}
 
-	public EasyMSX(Environment env, String host, int port, String user, String userIP) throws Exception {
-		this.environment = env;
-		this.host = host;
-		this.port = port;
-		this.user = user;
-		this.userIP = userIP;
-		this.serverConnection = true;
-		
-		initialize();
-	}
-	
-	public EasyMSX(Environment env, String team, String host, int port, String user, String userIP) throws Exception {
-		this.environment = env;
-		this.host = host;
-		this.port = port;
-		this.user = user;
-		this.userIP = userIP;
-		this.selectedTeam = team;
-		this.serverConnection = true;
-
-		initialize();
-	}
-
-	
 	private void initialize() throws SessionException, ServiceException, IOException, InterruptedException {
 		
 		initializeSession();
@@ -158,6 +117,8 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 		initializeFieldData();
 		initializeTeams();
 		initializeBrokerData();
+        initializeOrders();
+		initializeRoutes();
 		
         Log.LogMessage(LogLevels.BASIC, "Message Handlers count: " + requestMessageHandlers.size());
 
@@ -177,11 +138,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
         Log.LogMessage(LogLevels.BASIC, "EMSXAPI initialization complete");
 	}
 
-	public void start() {
-        initializeOrders();
-		initializeRoutes();
-	}
-	
 	private void initializeSession() throws SessionException, IOException, InterruptedException {
 
 		if(this.environment == Environment.BETA) emsxServiceName = "//blp/emapisvc_beta";
@@ -198,12 +154,12 @@ public class EasyMSX implements EventHandler, NotificationHandler {
         	throw new SessionException("Unable to start session.");
         }
         
-        while(!authorized) {
-        	if(authorizationFailed) {
-        		throw new SessionException("User authorization failed.");
-        	}
-        	Thread.sleep(0);
-        }
+        //while(!authorized) {
+        //	if(authorizationFailed) {
+        //		throw new SessionException("User authorization failed.");
+        //	}
+        //	Thread.sleep(0);
+        //}
 
         Log.LogMessage(LogLevels.BASIC, "Called for session start...");
 
@@ -466,13 +422,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
             Message msg = msgIter.next();
             if(msg.messageType().equals(SESSION_STARTED)) {
             	Log.LogMessage(LogLevels.BASIC, "Session started");
-            	if(serverConnection) {
-            		try {
-            			session.openService(authServiceName);
-            		} catch (Exception e) {
-                    	Log.LogMessage(LogLevels.BASIC, "Failed to open service");
-					}
-            	}
             } else if(msg.messageType().equals(SESSION_STARTUP_FAILURE)) {
             	Log.LogMessage(LogLevels.BASIC, "Session startup failure");
             } else if(msg.messageType().equals(SESSION_TERMINATED)) {
@@ -491,13 +440,7 @@ public class EasyMSX implements EventHandler, NotificationHandler {
         while (msgIter.hasNext()) {
             Message msg = msgIter.next();
             if(msg.messageType().equals(SERVICE_OPENED)) {
-     		   String serviceName = msg.getElementAsString("serviceName");
-     		   if(serviceName == authServiceName) {
-     			   Log.LogMessage(LogLevels.BASIC, "Auth Service opened");
-                   sendAuthRequest(session);
-     		   } else {
-     			   Log.LogMessage(LogLevels.BASIC, "EMSX Service opened");
-     		   }
+  			   Log.LogMessage(LogLevels.BASIC, "EMSX Service opened");
             } else if(msg.messageType().equals(SERVICE_OPEN_FAILURE)) {
             	Log.LogMessage(LogLevels.BASIC, "Service open failed");
             }
@@ -547,18 +490,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
         	Message msg = msgIter.next();
         	CorrelationID cID = msg.correlationID();
         	
-        	if(cID==authRequestID) {
-        		if(msg.messageType().equals(AUTHORIZATION_SUCCESS))
-        		{
-        			Log.LogMessage(LogLevels.DETAILED, "User authorised.");
-        			authorized = true;
-        		} else {
-        			Log.LogMessage(LogLevels.DETAILED, "User not authorized.");
-        			authorizationFailed=true;
-        		}
-        		return;
-        	}
-
         	if(requestMessageHandlers.containsKey(cID)) {
         		MessageHandler mh = requestMessageHandlers.get(cID);
         		mh.processMessage(msg);
@@ -578,31 +509,6 @@ public class EasyMSX implements EventHandler, NotificationHandler {
         }
     }
 
-   private void sendAuthRequest(Session session)
-   {
-       Service authService = session.getService(authServiceName);
-       Request authReq = authService.createAuthorizationRequest();
-
-       authReq.set("authId", user);
-       authReq.set("ipAddress", userIP);
-
-       Log.LogMessage(LogLevels.BASIC, "Sending authentication request: " + authReq.toString());
-
-       userIdentity = session.createIdentity();
-
-       authRequestID = new CorrelationID();
-
-       try
-       {
-           session.sendAuthorizationRequest(authReq, userIdentity, authRequestID);
-       }
-       catch (Exception e)
-       {
-           Log.LogMessage(LogLevels.BASIC, "Failed to send authentication request: " + e.getMessage());
-       }
-
-   }
-
 	void submitRequest(Request request, MessageHandler handler) {
 
 		CorrelationID newCID = new CorrelationID();
@@ -612,11 +518,7 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 		requestMessageHandlers.put(newCID, handler);
 		
 		try {
-			if(serverConnection) {
-				session.sendRequest(request,userIdentity, newCID);
-			} else {
-				session.sendRequest(request,newCID);
-			}
+			session.sendRequest(request,newCID);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -635,12 +537,8 @@ public class EasyMSX implements EventHandler, NotificationHandler {
 	        SubscriptionList subs = new SubscriptionList();
 	        subs.add(sub);
 	        
-	        if(serverConnection) {
-	        	session.subscribe(subs,userIdentity);
-	        } else {
-	        	session.subscribe(subs);
-	        }
-
+	        session.subscribe(subs);
+	        
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

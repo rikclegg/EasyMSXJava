@@ -61,6 +61,9 @@ public class Fields implements Iterable<Field> {
 			
 			if(dynamicFieldsOnly) {
 				SchemaFieldDefinition sfd = null;
+				if(fieldName.equals("EMSX_ASSET_CLASS")) {
+					Log.LogMessage(LogLevels.BASIC,"Here!");
+				}
 				if(owner instanceof Order) {
 					Order o = (Order)owner;
 					sfd = findSchemaFieldByName(fieldName,o.parent.emsxapi.orderFields);
@@ -94,7 +97,7 @@ public class Fields implements Iterable<Field> {
 	private SchemaFieldDefinition findSchemaFieldByName(String name, ArrayList<SchemaFieldDefinition>fields) {
 
 		for(SchemaFieldDefinition sfd: fields) {
-			if(sfd.name==name) {
+			if(sfd.name.equals(name)) {
 				return sfd;
 			}
 		}
